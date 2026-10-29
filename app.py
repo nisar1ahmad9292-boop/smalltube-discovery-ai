@@ -1,7 +1,6 @@
 
 import streamlit as st
-import csv
-import io
+from google import genai
 
 st.set_page_config(
     page_title="SmallTube Discovery AI",
@@ -10,92 +9,125 @@ st.set_page_config(
 )
 
 st.title("🎯 SmallTube Discovery AI")
-st.write("Plan better YouTube videos for your channel.")
+st.write("Plan better YouTube videos with AI.")
 
-channel = st.text_input("Channel name", "PhysioFix 60")
+# Connect securely to Gemini
+try:
+    api_key = st.secrets["GEMINI_API_KEY"]
+    client = genai.Client(api_key=api_key)
+except Exception:
+    client = None
+
+# User inputs
+channel = st.text_input(
+    "Channel name",
+    "PhysioFix 60"
+)
+
 topic = st.text_input(
     "Video topic",
     "Lower back pain after sitting"
 )
+
 languages = st.multiselect(
-    "Languages",
+    "Choose languages",
     ["English", "Urdu"],
     default=["English", "Urdu"]
 )
+
 formats = st.multiselect(
-    "Video formats",
+    "Choose video formats",
     ["YouTube Shorts", "Long video"],
     default=["YouTube Shorts", "Long video"]
 )
 
-if st.button("Generate my video plan", type="primary"):
-    if not topic.strip():
-        st.error("Please enter a video topic.")
-    else:
-        st.subheader("Video ideas")
-
-        ideas = [
-            f"Why does {topic.lower()} happen?",
-            f"3 common mistakes about {topic.lower()}",
-            f"What should you do about {topic.lower()}?",
-            f"When should you seek professional help for {topic.lower()}?"
-        ]
-
-        for i, idea in enumerate(ideas, 1):
-            st.write(f"**Idea {i}:** {idea}")
-
-        st.subheader("Sample script")
-
-        if "English" in languages:
-            st.markdown("**English**")
-            st.write(
-                f"Hook: Are you concerned about {topic.lower()}?"
-            )
-            st.write(
-                "Explain possible contributing factors in simple "
-                "language. Offer safe, general educational advice. "
-                "Remind viewers that symptoms can have different "
-                "causes and a qualified professional can assess them."
-            )
-            st.write(
-                f"CTA: Follow {channel} for simple health education."
-            )
-
-        if "Urdu" in languages:
-            st.markdown("**اردو**")
-            st.write(f"کیا آپ {topic} کے بارے میں پریشان ہیں؟")
-            st.write(
-                "اس کی مختلف وجوہات ہو سکتی ہیں۔ اپنی کیفیت کے "
-                "مطابق درست رہنمائی کے لیے مستند ہیلتھ پروفیشنل "
-                "سے مشورہ کریں۔"
-            )
-            st.write(
-                f"{channel} کو فالو کریں، مزید آسان معلومات کے لیے۔"
-            )
-
-        st.subheader("Suggested format")
-        for fmt in formats:
-            st.write(f"• {fmt}")
-
-        st.info(
-            "Prototype mode: these are template-based suggestions, "
-            "not live YouTube search data or guaranteed recommendations."
-        )
-
-        output = io.StringIO()
-        writer = csv.writer(output)
-        writer.writerow(["Channel", "Topic", "Video idea"])
-        for idea in ideas:
-            writer.writerow([channel, topic, idea])
-
-        st.download_button(
-            "Download ideas as CSV",
-            data=output.getvalue(),
-            file_name="smalltube_video_ideas.csv",
-            mime="text/csv"
-        )
-
-st.divider()
-st.caption(
-    "SmallTube Discovery AI — planning assistant for original content."
+audience = st.text_input(
+    "Target audience",
+    "General viewers"
 )
+
+tone = st.selectbox(
+    "Video style",
+    ["Educational", "Friendly", "Professional", "Engaging"]
+)
+
+if st.button("🚀 Generate my AI video plan", type="primary"):
+
+    if not topic.strip():
+        st.warning("Please enter a video topic.")
+
+    elif not languages or not formats:
+        st.warning("Please select at least one language and format.")
+
+    elif client is None:
+        st.error(
+            "Gemini connection not found. "
+            "Please check your Streamlit Secrets."
+        )
+
+    else:
+        prompt = f"""
+You are an expert YouTube content strategist and scriptwriter.
+
+Create a professional YouTube content plan.
+
+CHANNEL: {channel}
+TOPIC: {topic}
+LANGUAGES: {", ".join(languages)}
+VIDEO FORMATS: {", ".join(formats)}
+TARGET AUDIENCE: {audience}
+STYLE: {tone}
+
+IMPORTANT INSTRUCTIONS:
+
+1. Give 10 original and relevant video ideas related to the topic.
+2. For each idea provide:
+   - A catchy YouTube title
+   - A strong opening hook
+   - Why viewers may find it useful
+3. Create a separate, complete sample script for each selected video format.
+4. Make the scripts natural, engaging and easy to speak.
+5. If Urdu is selected, write natural Urdu in Urdu script.
+6. If English is selected, use clear, natural English.
+7. Include scene suggestions and visual ideas.
+8. Include a suitable description, call to action and hashtags.
+9. Avoid repetitive, misleading or exaggerated titles.
+10. Make content original. Do not copy existing creators.
+
+HEALTH CONTENT SAFETY:
+If the topic is about health or physiotherapy:
+- Keep information educational.
+- Do not diagnose viewers.
+- Do not promise cures or guaranteed results.
+- Do not recommend exercises as suitable for everyone.
+- Mention professional assessment when symptoms are severe,
+  persistent or concerning.
+
+Use clear headings and a well-organized format.
+"""
+
+        with st.spinner("Gemini is creating your video plan..."):
+            try:
+                response = client.models.generate_content(
+                    model="gemini-flash-latest",
+                    contents=prompt
+                )
+
+                result = response.text
+
+                if result:
+                    st.success("Your AI video plan is ready!")
+                    st.markdown(result)
+
+                    st.download_button(
+                        "📥 Download video plan",
+                        data=result,
+                        file_name="smalltube_video_plan.txt",
+                        mime="text/plain"
+                    )
+                else:
+                    st.error("Gemini returned an empty response.")
+
+            except Exception as e:
+                st.error("Something went wrong while generating your plan.")
+                st.write(str(e))
