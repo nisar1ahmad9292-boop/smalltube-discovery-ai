@@ -1,6 +1,9 @@
 
 import streamlit as st
+import time
 from google import genai
+
+# ---------------- PAGE SETTINGS ----------------
 
 st.set_page_config(
     page_title="SmallTube Discovery AI",
@@ -9,199 +12,348 @@ st.set_page_config(
 )
 
 st.title("🎯 SmallTube Discovery AI")
-st.write("Plan better YouTube videos with AI.")
+st.caption("Find better YouTube ideas and create professional scripts.")
 
-# Connect securely to Gemini
+# ---------------- GEMINI CONNECTION ----------------
+
+@st.cache_resource
+def connect_gemini():
+    api_key = st.secrets["GEMINI_API_KEY"].strip()
+    return genai.Client(api_key=api_key)
+
 try:
-    api_key = st.secrets["GEMINI_API_KEY"]
-    client = genai.Client(api_key=api_key)
-except Exception:
+    client = connect_gemini()
+    connection_ok = True
+except Exception as e:
     client = None
+    connection_ok = False
+    connection_error = str(e)
 
-# User inputs
+# ---------------- GEMINI REQUEST WITH RETRIES ----------------
+
+def generate_with_retry(prompt, max_tokens=2500):
+    last_error = None
+
+    for attempt in range(3):
+        try:
+            response = client.models.generate_content(
+                model="gemini-flash-latest",
+                contents=prompt,
+                config={
+                    "max_output_tokens": max_tokens,
+                    "temperature": 0.7
+                }
+            )
+
+            if not response.text:
+                raise ValueError("Gemini returned an empty response.")
+
+            return response.text
+
+        except Exception as e:
+            last_error = e
+            error_text = str(e).lower()
+
+            temporary_errors = [
+                "503", "500", "502", "504",
+                "overloaded", "unavailable",
+                "temporarily"
+            ]
+
+            is_temporary = any(
+                message in error_text
+                for message in temporary_errors
+            )
+
+            if is_temporary and attempt < 2:
+                time.sleep(2 ** (attempt + 1))
+                continue
+
+            raise last_error
+
+    raise last_error
+
+
+# ---------------- APP INPUTS ----------------
+
+st.subheader("1. Your YouTube channel")
+
 channel = st.text_input(
     "Channel name",
-    "PhysioFix 60"
+    value="PhysioFix 60"
 )
 
 topic = st.text_input(
-    "Video topic",
-    "Lower back pain after sitting"
-)
-
-languages = st.multiselect(
-    "Choose languages",
-    ["English", "Urdu"],
-    default=["English", "Urdu"]
-)
-
-formats = st.multiselect(
-    "Choose video formats",
-    ["YouTube Shorts", "Long video"],
-    default=["YouTube Shorts", "Long video"]
+    "What topic do you want to make videos about?",
+    value="Lower back pain after sitting"
 )
 
 audience = st.text_input(
     "Target audience",
-    "General viewers"
+    value="General viewers"
 )
 
-tone = st.selectbox(
-    "Video style",
+language = st.selectbox(
+    "Choose ONE language",
+    ["English", "Urdu"]
+)
+
+video_format = st.selectbox(
+    "Choose video format",
+    ["YouTube Shorts", "Long video"]
+)
+
+style = st.selectbox(
+    "Choose content style",
     ["Educational", "Friendly", "Professional", "Engaging"]
 )
 
-if st.button("🚀 Generate my AI video plan", type="primary"):
+# ---------------- STAGE 1: IDEAS ----------------
+
+st.divider()
+st.subheader("2. Generate video ideas")
+
+st.write(
+    "First, discover five useful and original ideas "
+    "for your selected topic."
+)
+
+if st.button("💡 Generate 5 Ideas", type="primary"):
 
     if not topic.strip():
         st.warning("Please enter a video topic.")
 
-    elif not languages or not formats:
-        st.warning("Please select at least one language and format.")
-
-    elif client is None:
-        st.error(
-            "Gemini connection not found. "
-            "Please check your Streamlit Secrets."
-        )
+    elif not connection_ok:
+        st.error("Gemini connection problem.")
+        st.write(connection_error)
 
     else:
+        ideas_prompt = f"""
+You are an expert YouTube content strategist.
 
-        prompt = f"""
-You are a senior YouTube content strategist, professional scriptwriter,
-and bilingual English-Urdu communication expert.
-
-Your task is to create a high-quality, practical YouTube content plan.
+Create exactly FIVE excellent, original YouTube video ideas.
 
 CHANNEL: {channel}
 TOPIC: {topic}
-LANGUAGES: {", ".join(languages)}
-FORMATS: {", ".join(formats)}
-TARGET AUDIENCE: {audience}
-STYLE: {tone}
+AUDIENCE: {audience}
+LANGUAGE: {language}
+FORMAT: {video_format}
+STYLE: {style}
 
-PART 1 — CONTENT IDEAS
+STRICT QUALITY RULES:
 
-Generate 10 genuinely different and useful video ideas.
+1. Every idea must directly relate to the actual topic.
+2. Each idea must address a real viewer question, problem,
+   curiosity or practical need.
+3. Give each idea a specific, attractive and grammatically
+   correct title.
+4. Avoid repetitive ideas and generic titles.
+5. Do not invent facts or make misleading promises.
+6. Think about what viewers would genuinely want to learn.
+7. Do not create scripts yet.
 
-For every idea provide:
-1. A clear and attractive title.
-2. A natural opening hook.
-3. The main question or problem addressed.
-4. Three useful points the video will explain.
-5. Why viewers might find it valuable.
+For EACH of the five ideas provide:
 
-Avoid repetitive ideas, vague titles and artificial clickbait.
+IDEA NUMBER:
+TITLE:
+VIEWER PROBLEM:
+OPENING HOOK:
+KEY POINTS (three):
+WHY VIEWERS MAY WATCH:
 
-PART 2 — LANGUAGE QUALITY
+LANGUAGE RULES:
 
-If English is selected:
-- Write in natural, modern spoken English.
-- Use short, grammatically correct sentences.
-- Sound like a knowledgeable human speaking to viewers.
-- Avoid robotic, repetitive or overly complicated wording.
+If English:
+Use natural, simple, fluent spoken English.
 
-If Urdu is selected:
-- Write in natural Pakistani Urdu using Urdu script.
-- Use simple, fluent and conversational Pakistani expressions.
-- Do not use Hindi vocabulary or Indian-style Hindi sentences.
-- Do not translate English word-for-word.
-- Write as a native Pakistani Urdu speaker would naturally speak.
-- Avoid Roman Urdu unless specifically requested.
-- Check grammar, sentence flow and word choice.
+If Urdu:
+Use natural Pakistani Urdu in Urdu script.
+Use expressions that a Pakistani Urdu speaker
+would naturally use.
+Do not use Hindi vocabulary or awkward translations.
+Do not use Roman Urdu.
 
-IMPORTANT:
-Create separate English and Urdu versions.
-Do not mix both languages in the same script.
-Do not use awkward constructions such as
-"Why does simple exercises happen?"
-Use grammatically correct and natural questions.
-
-PART 3 — VIDEO SCRIPTS
-
-For each selected video format, create a complete sample script
-for the most useful idea.
-
-For every script include:
-
-1. VIDEO TITLE
-2. OPENING HOOK
-3. MAIN EXPLANATION
-4. PRACTICAL EXAMPLES OR TIPS
-5. CONCLUSION
-6. CALL TO ACTION
-
-For YouTube Shorts:
-- Target duration: 45–60 seconds.
-- Start with an interesting hook.
-- Keep the explanation concise and useful.
-- Make the spoken dialogue easy to deliver.
-
-For long videos:
-- Create a logical introduction, detailed explanation,
-  practical sections and conclusion.
-- Avoid unnecessary repetition.
-- Make the script informative and engaging.
-
-PART 4 — VISUAL PLAN
-
-Suggest suitable scenes and visuals for each script.
-Keep visual suggestions relevant to the spoken dialogue.
-
-PART 5 — YOUTUBE PUBLISHING
-
-Provide:
-- A natural video description.
-- A relevant call to action.
-- 5–8 relevant hashtags.
-- A suitable thumbnail concept.
-
-PART 6 — QUALITY CHECK
-
-Before presenting the final answer, check:
-- Are all ideas relevant to the actual topic?
-- Are titles grammatically correct?
-- Does each script make sense when spoken aloud?
-- Is the Urdu natural Pakistani Urdu?
-- Is the English natural spoken English?
-- Are the two language versions separate?
-- Is there unnecessary repetition?
-- Are the claims accurate and not exaggerated?
-
-HEALTH AND PHYSIOTHERAPY SAFETY:
-If the topic concerns health or physiotherapy:
-- Provide educational information, not individual diagnosis.
-- Do not promise a cure or guaranteed results.
-- Do not claim one exercise is suitable for everyone.
-- Include professional assessment advice for severe,
-  persistent or concerning symptoms.
-
-Present the final answer with clear headings and separate sections.
-Prioritize accuracy, natural language and practical value over quantity.
+Make all five ideas meaningfully different.
+Return only the five ideas with clear headings.
 """
 
-        with st.spinner("Gemini is creating your video plan..."):
+        with st.spinner("Finding your best video ideas..."):
             try:
-                response = client.models.generate_content(
-                    model="gemini-flash-latest",
-                    contents=prompt
+                result = generate_with_retry(
+                    ideas_prompt,
+                    max_tokens=2000
                 )
 
-                result = response.text
-
-                if result:
-                    st.success("Your AI video plan is ready!")
-                    st.markdown(result)
-
-                    st.download_button(
-                        "📥 Download video plan",
-                        data=result,
-                        file_name="smalltube_video_plan.txt",
-                        mime="text/plain"
-                    )
-                else:
-                    st.error("Gemini returned an empty response.")
+                st.session_state["ideas"] = result
+                st.session_state["last_topic"] = topic
+                st.session_state["last_language"] = language
+                st.success("Five video ideas generated!")
 
             except Exception as e:
-                st.error("Something went wrong while generating your plan.")
+                st.error("Idea generation failed.")
                 st.write(str(e))
+
+
+# Display saved ideas
+if "ideas" in st.session_state:
+
+    st.divider()
+    st.subheader("Your five video ideas")
+
+    st.markdown(st.session_state["ideas"])
+
+    st.download_button(
+        "📥 Download all ideas",
+        data=st.session_state["ideas"],
+        file_name="smalltube_video_ideas.txt",
+        mime="text/plain"
+    )
+
+
+# ---------------- STAGE 2: SCRIPT ----------------
+
+st.divider()
+st.subheader("3. Create your professional script")
+
+st.write(
+    "Choose one idea from the results above. "
+    "Copy its title into the box below."
+)
+
+selected_idea = st.text_input(
+    "Enter your selected video idea",
+    placeholder="Paste your selected video title here"
+)
+
+if st.button("✍️ Generate My Script", type="primary"):
+
+    if not connection_ok:
+        st.error("Gemini connection problem.")
+        st.write(connection_error)
+
+    elif not selected_idea.strip():
+        st.warning("Please enter your selected video idea.")
+
+    elif "ideas" not in st.session_state:
+        st.warning("Please generate your five ideas first.")
+
+    else:
+
+        script_prompt = f"""
+You are a highly experienced professional YouTube scriptwriter.
+
+Write ONE excellent, complete and natural video script.
+
+CHANNEL: {channel}
+MAIN TOPIC: {topic}
+SELECTED IDEA: {selected_idea}
+AUDIENCE: {audience}
+LANGUAGE: {language}
+FORMAT: {video_format}
+STYLE: {style}
+
+LANGUAGE QUALITY IS EXTREMELY IMPORTANT.
+
+For English:
+- Write natural spoken English.
+- Use correct grammar and sentence structure.
+- Sound like an experienced human presenter.
+- Use short, clear and meaningful sentences.
+
+For Urdu:
+- Write in Urdu script, not Roman Urdu.
+- Use natural Pakistani Urdu.
+- Do not translate English sentences word for word.
+- Avoid Hindi vocabulary and Indian-style expressions.
+- Use fluent, familiar and grammatically correct Urdu.
+- Make the dialogue sound natural when spoken aloud.
+
+SCRIPT STRUCTURE:
+
+1. Attractive video title.
+2. Opening hook that creates curiosity.
+3. Short introduction.
+4. Main explanation in a logical sequence.
+5. Useful examples or practical tips.
+6. Memorable conclusion.
+7. Natural call to action.
+
+FORMAT REQUIREMENTS:
+
+For YouTube Shorts:
+- Target 45 to 60 seconds.
+- Approximately 100 to 140 spoken words.
+- No unnecessary introduction.
+- Strong hook in the first few seconds.
+- Keep the explanation focused.
+
+For Long video:
+- Create a detailed, well-organized script.
+- Include meaningful sections and transitions.
+- Avoid repetition and filler.
+
+Also provide:
+- Scene-by-scene visual suggestions.
+- Relevant video description.
+- Five to eight relevant hashtags.
+- Thumbnail concept.
+
+IMPORTANT:
+Do not write generic filler.
+Do not repeat the same point.
+Do not make unsupported claims.
+Make every sentence useful and meaningful.
+
+If the topic is about health or physiotherapy:
+- Provide educational information, not diagnosis.
+- Do not promise a cure.
+- Do not claim exercises suit everyone.
+- Recommend professional assessment for severe,
+  persistent or concerning symptoms.
+
+Before returning the answer, check grammar,
+natural speech, accuracy and logical flow.
+
+Return only the finished professional content.
+"""
+
+        with st.spinner(
+            "Creating your professional script. Please wait..."
+        ):
+            try:
+                script = generate_with_retry(
+                    script_prompt,
+                    max_tokens=3500
+                )
+
+                st.session_state["generated_script"] = script
+                st.success("Your script is ready!")
+
+            except Exception as e:
+                st.error("Script generation failed.")
+                st.write(str(e))
+
+
+# Display generated script
+if "generated_script" in st.session_state:
+
+    st.divider()
+    st.subheader("Your professional video script")
+
+    st.markdown(st.session_state["generated_script"])
+
+    st.download_button(
+        "📥 Download your script",
+        data=st.session_state["generated_script"],
+        file_name="smalltube_professional_script.txt",
+        mime="text/plain"
+    )
+
+
+# ---------------- FOOTER ----------------
+
+st.divider()
+st.caption(
+    "SmallTube Discovery AI | AI-assisted YouTube planning. "
+    "Organic search or recommendation placement is not guaranteed."
+)
