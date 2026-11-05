@@ -31,9 +31,7 @@ except Exception as e:
 
 # ---------------- GEMINI REQUEST WITH RETRIES ----------------
 
-
 def generate_with_retry(prompt, max_tokens=2500):
-
     models = [
         "gemini-3.8-flash",
         "gemini-3.5-flash-lite"
@@ -43,32 +41,28 @@ def generate_with_retry(prompt, max_tokens=2500):
 
     for model_name in models:
         for attempt in range(2):
-
             try:
                 response = client.models.generate_content(
                     model=model_name,
                     contents=prompt,
                     config={
                         "max_output_tokens": max_tokens,
-                        "temperature": 0.7
+                        "temperature": 0.5
                     }
                 )
 
                 if not response.text:
-                    raise ValueError("Gemini returned an empty response.")
+                    raise ValueError("Empty response from Gemini.")
 
                 return response.text
 
             except Exception as e:
-                errors.append(
-                    f"{model_name}, attempt {attempt + 1}: {str(e)}"
-                )
-
                 error_text = str(e).lower()
+                errors.append(f"{model_name}: {str(e)}")
 
                 temporary = any(
-                    code in error_text
-                    for code in [
+                    word in error_text
+                    for word in [
                         "503", "500", "502", "504",
                         "unavailable", "overloaded",
                         "temporarily"
@@ -76,7 +70,7 @@ def generate_with_retry(prompt, max_tokens=2500):
                 )
 
                 if temporary and attempt == 0:
-                    time.sleep(2)
+                    time.sleep(3)
                     continue
 
                 if temporary:
@@ -85,10 +79,9 @@ def generate_with_retry(prompt, max_tokens=2500):
                 raise
 
     raise RuntimeError(
-        "All Gemini models failed. Details: "
+        "Gemini is temporarily unavailable. Please try again later. "
         + " | ".join(errors)
     )
-
 # ---------------- APP INPUTS ----------------
 
 st.subheader("1. Your YouTube channel")
