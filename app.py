@@ -31,48 +31,63 @@ except Exception as e:
 
 # ---------------- GEMINI REQUEST WITH RETRIES ----------------
 
+
 def generate_with_retry(prompt, max_tokens=2500):
-    last_error = None
 
-    for attempt in range(3):
-        try:
-            response = client.models.generate_content(
-                model="gemini-flash-latest",
-                contents=prompt,
-                config={
-                    "max_output_tokens": max_tokens,
-                    "temperature": 0.7
-                }
-            )
+    models = [
+        "gemini-3.8-flash",
+        "gemini-3.5-flash-lite"
+    ]
 
-            if not response.text:
-                raise ValueError("Gemini returned an empty response.")
+    errors = []
 
-            return response.text
+    for model_name in models:
+        for attempt in range(2):
 
-        except Exception as e:
-            last_error = e
-            error_text = str(e).lower()
+            try:
+                response = client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config={
+                        "max_output_tokens": max_tokens,
+                        "temperature": 0.7
+                    }
+                )
 
-            temporary_errors = [
-                "503", "500", "502", "504",
-                "overloaded", "unavailable",
-                "temporarily"
-            ]
+                if not response.text:
+                    raise ValueError("Gemini returned an empty response.")
 
-            is_temporary = any(
-                message in error_text
-                for message in temporary_errors
-            )
+                return response.text
 
-            if is_temporary and attempt < 2:
-                time.sleep(2 ** (attempt + 1))
-                continue
+            except Exception as e:
+                errors.append(
+                    f"{model_name}, attempt {attempt + 1}: {str(e)}"
+                )
 
-            raise last_error
+                error_text = str(e).lower()
 
-    raise last_error
+                temporary = any(
+                    code in error_text
+                    for code in [
+                        "503", "500", "502", "504",
+                        "unavailable", "overloaded",
+                        "temporarily"
+                    ]
+                )
 
+                if temporary and attempt == 0:
+                    time.sleep(2)
+                    continue
+
+                if temporary:
+                    break
+
+                raise
+
+    raise RuntimeError(
+        "All Gemini models failed. Details: "
+        + " | ".join(errors)
+    )
 
 # ---------------- APP INPUTS ----------------
 
