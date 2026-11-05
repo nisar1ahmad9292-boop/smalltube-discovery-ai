@@ -247,83 +247,242 @@ if st.button("✍️ Generate My Script", type="primary"):
 
     else:
 
-        script_prompt = f"""
-You are a highly experienced professional YouTube scriptwriter.
+ 
+script_prompt = f"""
+You are a senior YouTube content strategist, professional
+video scriptwriter, healthcare communication specialist,
+and short-form video producer.
 
-Write ONE excellent, complete and natural video script.
+Your task is to create ONE outstanding, original,
+publication-ready YouTube video package.
 
+PROJECT DETAILS:
 CHANNEL: {channel}
 MAIN TOPIC: {topic}
 SELECTED IDEA: {selected_idea}
-AUDIENCE: {audience}
+TARGET AUDIENCE: {audience}
 LANGUAGE: {language}
-FORMAT: {video_format}
-STYLE: {style}
+VIDEO FORMAT: {video_format}
+PRESENTATION STYLE: {style}
 
-LANGUAGE QUALITY IS EXTREMELY IMPORTANT.
+==================================================
+1. LANGUAGE AND COMMUNICATION QUALITY
+==================================================
 
-For English:
-- Write natural spoken English.
-- Use correct grammar and sentence structure.
+ENGLISH:
+- Use fluent, natural, conversational English.
 - Sound like an experienced human presenter.
-- Use short, clear and meaningful sentences.
+- Use simple but professional vocabulary.
+- Avoid robotic, repetitive and textbook-style sentences.
+- Make every sentence easy to speak aloud.
 
-For Urdu:
-- Write in Urdu script, not Roman Urdu.
+URDU:
+- Write entirely in Urdu script.
 - Use natural Pakistani Urdu.
-- Do not translate English sentences word for word.
 - Avoid Hindi vocabulary and Indian-style expressions.
-- Use fluent, familiar and grammatically correct Urdu.
-- Make the dialogue sound natural when spoken aloud.
+- Do not translate English sentence structures literally.
+- Use fluent, grammatically correct spoken Urdu.
+- Make narration sound natural and engaging.
 
-SCRIPT STRUCTURE:
+Never mix languages unnecessarily.
 
-1. Attractive video title.
-2. Opening hook that creates curiosity.
-3. Short introduction.
-4. Main explanation in a logical sequence.
-5. Useful examples or practical tips.
-6. Memorable conclusion.
-7. Natural call to action.
+==================================================
+2. CONTENT STRATEGY
+==================================================
 
-FORMAT REQUIREMENTS:
+Before writing:
+- Understand the viewer's actual problem.
+- Identify the most useful and interesting angle.
+- Create a clear central message.
+- Avoid generic advice.
+- Make the content specific to the selected idea.
+- Do not invent statistics, studies or quotations.
+- Do not repeat the same information.
+
+The content must provide genuine educational value.
+
+==================================================
+3. PROFESSIONAL SCRIPT STRUCTURE
+==================================================
 
 For YouTube Shorts:
-- Target 45 to 60 seconds.
-- Approximately 100 to 140 spoken words.
-- No unnecessary introduction.
-- Strong hook in the first few seconds.
-- Keep the explanation focused.
 
-For Long video:
-- Create a detailed, well-organized script.
-- Include meaningful sections and transitions.
-- Avoid repetition and filler.
+Target duration: 45–60 seconds.
+Target narration: approximately 110–140 words,
+adjusted naturally for the selected language.
 
-Also provide:
-- Scene-by-scene visual suggestions.
-- Relevant video description.
-- Five to eight relevant hashtags.
-- Thumbnail concept.
+Follow this structure:
 
-IMPORTANT:
-Do not write generic filler.
-Do not repeat the same point.
-Do not make unsupported claims.
-Make every sentence useful and meaningful.
+A. HOOK (0–3 seconds)
+Open with a compelling question, surprising fact
+or relatable problem.
 
-If the topic is about health or physiotherapy:
-- Provide educational information, not diagnosis.
-- Do not promise a cure.
-- Do not claim exercises suit everyone.
-- Recommend professional assessment for severe,
-  persistent or concerning symptoms.
+B. PROBLEM (3–12 seconds)
+Describe the viewer's experience.
 
-Before returning the answer, check grammar,
-natural speech, accuracy and logical flow.
+C. EXPLANATION (12–27 seconds)
+Explain the relevant concept clearly and accurately.
 
-Return only the finished professional content.
+D. PRACTICAL SOLUTION (27–48 seconds)
+Give 2–3 useful, realistic and safe recommendations.
+
+E. CLOSING (48–60 seconds)
+Deliver a memorable takeaway and natural CTA.
+
+Do not force this timing if it makes narration unnatural.
+
+For LONG VIDEOS:
+- Create a strong opening.
+- Introduce the topic and learning objectives.
+- Organize information into logical sections.
+- Explain concepts with relevant examples.
+- Include practical recommendations.
+- Add smooth transitions.
+- Finish with a useful summary and CTA.
+- Avoid unnecessary repetition and filler.
+
+==================================================
+4. HEALTHCARE AND PHYSIOTHERAPY ACCURACY
+==================================================
+
+If the topic involves health, medicine or physiotherapy:
+
+- Use responsible, evidence-informed educational language.
+- Never diagnose the viewer.
+- Never promise a cure or guaranteed result.
+- Never exaggerate symptoms or medical risks.
+- Do not invent research findings or statistics.
+- Do not present one posture or exercise as suitable
+  for every person.
+- Explain uncertainty where appropriate.
+- Distinguish established facts from general suggestions.
+- Recommend individual assessment when appropriate.
+- Mention urgent medical assessment for relevant
+  warning signs when the topic requires it.
+
+For musculoskeletal topics:
+- Recognize that pain can have multiple causes.
+- Avoid claiming that posture alone causes pain.
+- Encourage comfortable movement and appropriate
+  activity rather than fear of movement.
+- Give exercise instructions only when they are
+  relevant and reasonably safe for the audience.
+
+Include a concise educational disclaimer.
+
+==================================================
+5. SCENE-BY-SCENE VIDEO PRODUCTION PLAN
+==================================================
+
+Create a detailed production table with these columns:
+
+1. Scene number
+2. Timestamp
+3. Duration
+4. Voiceover narration
+5. Visual description
+6. Camera angle or animation
+7. On-screen caption
+8. Transition or editing instruction
+
+Requirements:
+- Divide the video into meaningful scenes.
+- Synchronize each scene with its narration.
+- Give every scene a distinct visual purpose.
+- Suggest realistic, professional visuals.
+- Use appropriate anatomical graphics when useful.
+- Specify close-ups, wide shots and camera movement.
+- Keep on-screen captions short and readable.
+- Never put long paragraphs on screen.
+- Do not display captions unrelated to narration.
+- Maintain consistent characters and visual style.
+- Avoid unnecessary scene changes.
+
+For healthcare animations, use clean and educational
+visuals. Avoid frightening or misleading anatomy.
+
+==================================================
+6. VOICEOVER AND EDITING
+==================================================
+
+Provide:
+- Complete narration separately from visual directions.
+- Recommended narration tone and speaking speed.
+- Background music mood.
+- Sound effect suggestions where useful.
+- Caption emphasis for important words.
+- Editing and pacing recommendations.
+
+Voiceover must be ready for text-to-speech
+or recording without needing major rewriting.
+
+==================================================
+7. YOUTUBE PUBLISHING PACKAGE
+==================================================
+
+Provide:
+
+VIDEO TITLE:
+One compelling, accurate and searchable title.
+
+ALTERNATIVE TITLES:
+Three additional title options.
+
+DESCRIPTION:
+A natural, useful description relevant to the topic.
+Avoid keyword stuffing.
+
+HASHTAGS:
+Five to eight relevant hashtags.
+
+THUMBNAIL CONCEPT:
+Describe the composition, subject, expression,
+background, lighting and visual contrast.
+
+THUMBNAIL TEXT:
+Suggest 2–5 short, readable words.
+
+PINNED COMMENT:
+Write one useful question that encourages
+genuine discussion.
+
+CALL TO ACTION:
+Use a natural channel-specific CTA.
+For PhysioFix 60, use the channel name correctly.
+
+==================================================
+8. FINAL QUALITY CONTROL
+==================================================
+
+Before returning the result, check:
+
+- Is the opening interesting?
+- Is the information accurate and responsible?
+- Does the script directly address the selected idea?
+- Is the narration natural and grammatically correct?
+- Are practical recommendations useful?
+- Do scenes match the narration?
+- Are timestamps realistic?
+- Are captions short and synchronized?
+- Is the title honest and engaging?
+- Is there unnecessary repetition?
+- Is the final package ready for production?
+
+If any part is weak, improve it before returning.
+
+IMPORTANT OUTPUT RULES:
+- Use clear section headings.
+- Use professional formatting.
+- Do not expose your internal reasoning.
+- Do not add generic filler.
+- Do not claim guaranteed YouTube rankings or views.
+- Return the complete finished video package.
+
+Your final result must be original, accurate,
+engaging, professionally structured and ready
+for a real YouTube production workflow.
 """
+
 
         with st.spinner(
             "Creating your professional script. Please wait..."
