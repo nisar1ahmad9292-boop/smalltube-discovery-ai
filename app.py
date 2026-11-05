@@ -481,8 +481,7 @@ engaging, professionally structured and ready
 for a real YouTube production workflow.
 """
 
-
-        with st.spinner(
+with st.spinner(
             "Creating your professional script. Please wait..."
         ):
             try:
