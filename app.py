@@ -245,10 +245,8 @@ if st.button("✍️ Generate My Script", type="primary"):
     elif "ideas" not in st.session_state:
         st.warning("Please generate your five ideas first.")
 
-    else:
-
- 
-script_prompt = f"""
+else:
+    script_prompt = f"""
 You are a senior YouTube content strategist, professional
 video scriptwriter, healthcare communication specialist,
 and short-form video producer.
