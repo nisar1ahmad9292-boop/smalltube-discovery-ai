@@ -137,7 +137,7 @@ if st.button("💡 Generate 5 Ideas", type="primary"):
 
     else:
 
-    ideas_prompt = f"""
+        ideas_prompt = f"""
 You are an expert YouTube content strategist, audience researcher,
 and professional video idea developer.
 
@@ -215,7 +215,7 @@ for the specified audience and language.
 
 Return only the five completed ideas.
 """ 
-    with st.spinner("Finding your best video ideas..."):
+with st.spinner("Finding your best video ideas..."):
             try:
                 result = generate_with_retry(
                     ideas_prompt,
@@ -229,7 +229,7 @@ Return only the five completed ideas.
 
      
 
-           except Exception as e:
+            except Exception as e:
                 st.error("Idea generation failed.")
                 st.write(str(e))
 
