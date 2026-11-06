@@ -136,54 +136,6 @@ if st.button("💡 Generate 5 Ideas", type="primary"):
         st.write(connection_error)
 
     else:
-        ideas_prompt = f"""
-You are an expert YouTube content strategist.
-
-Create exactly FIVE excellent, original YouTube video ideas.
-
-CHANNEL: {channel}
-TOPIC: {topic}
-AUDIENCE: {audience}
-LANGUAGE: {language}
-FORMAT: {video_format}
-STYLE: {style}
-
-STRICT QUALITY RULES:
-
-1. Every idea must directly relate to the actual topic.
-2. Each idea must address a real viewer question, problem,
-   curiosity or practical need.
-3. Give each idea a specific, attractive and grammatically
-   correct title.
-4. Avoid repetitive ideas and generic titles.
-5. Do not invent facts or make misleading promises.
-6. Think about what viewers would genuinely want to learn.
-7. Do not create scripts yet.
-
-For EACH of the five ideas provide:
-
-IDEA NUMBER:
-TITLE:
-VIEWER PROBLEM:
-OPENING HOOK:
-KEY POINTS (three):
-WHY VIEWERS MAY WATCH:
-
-LANGUAGE RULES:
-
-If English:
-Use natural, simple, fluent spoken English.
-
-If Urdu:
-Use natural Pakistani Urdu in Urdu script.
-Use expressions that a Pakistani Urdu speaker
-would naturally use.
-Do not use Hindi vocabulary or awkward translations.
-Do not use Roman Urdu.
-
-Make all five ideas meaningfully different.
-Return only the five ideas with clear headings.
-"""
 
         with st.spinner("Finding your best video ideas..."):
             try:
@@ -197,7 +149,86 @@ Return only the five ideas with clear headings.
                 st.session_state["last_language"] = language
                 st.success("Five video ideas generated!")
 
-            except Exception as e:
+     
+ideas_prompt = f"""
+You are an expert YouTube content strategist, audience researcher,
+and professional video idea developer.
+
+Your task is to create FIVE highly distinct, original,
+valuable and engaging YouTube video ideas.
+
+PROJECT DETAILS:
+Channel: {channel}
+Main topic: {topic}
+Target audience: {audience}
+Language: {language}
+Video format: {video_format}
+Style: {style}
+
+QUALITY REQUIREMENTS:
+
+1. Each of the five ideas must explore a DIFFERENT angle.
+2. Avoid repeating the same problem, solution or message.
+3. Focus on real questions, problems and interests of the target audience.
+4. Prefer specific, practical and useful topics over generic topics.
+5. Create curiosity without misleading or sensational claims.
+6. Titles must be clear, natural and attractive.
+7. Hooks must capture attention within the first few seconds.
+8. Key points must be meaningful, relevant and logically connected.
+9. Explain why the intended audience would find each idea valuable.
+10. Do not invent statistics, research findings or facts.
+11. Do not claim that a topic is trending or popular without actual data.
+12. Do not guarantee views, rankings or YouTube recommendations.
+
+DIVERSITY REQUIREMENT:
+
+Make the five ideas different in their approach.
+Where appropriate, include a mix of:
+- Common mistakes and misconceptions.
+- Practical tips and demonstrations.
+- Explanations of causes and mechanisms.
+- Frequently asked audience questions.
+- Evidence-informed educational topics.
+
+LANGUAGE REQUIREMENTS:
+
+For English:
+Use fluent, natural and professional spoken English.
+
+For Urdu:
+Use natural Pakistani Urdu in Urdu script.
+Avoid Roman Urdu, Hindi vocabulary and awkward translations.
+
+HEALTH AND PHYSIOTHERAPY SAFETY:
+
+If the topic involves health or physiotherapy:
+- Use medically responsible and evidence-aware language.
+- Do not diagnose viewers.
+- Do not promise cures or guaranteed pain relief.
+- Do not suggest that one exercise is suitable for everyone.
+- Mention when individual assessment may be necessary.
+- Avoid unsupported claims about bones, muscles, discs or posture.
+
+OUTPUT FORMAT:
+
+IDEA 1
+TITLE:
+VIEWER PROBLEM:
+OPENING HOOK:
+THREE KEY POINTS:
+WHY THIS IDEA IS VALUABLE:
+
+Repeat this exact structure for IDEA 2, IDEA 3,
+IDEA 4 and IDEA 5.
+
+FINAL QUALITY CHECK:
+Before responding, check that all five ideas are distinct,
+useful, accurate, grammatically correct and appropriate
+for the specified audience and language.
+
+Return only the five completed ideas.
+"""
+       except Exception as e:
                 st.error("Idea generation failed.")
                 st.write(str(e))
 
