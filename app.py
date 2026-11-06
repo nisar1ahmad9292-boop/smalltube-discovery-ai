@@ -137,20 +137,7 @@ if st.button("💡 Generate 5 Ideas", type="primary"):
 
     else:
 
-        with st.spinner("Finding your best video ideas..."):
-            try:
-                result = generate_with_retry(
-                    ideas_prompt,
-                    max_tokens=2000
-                )
-
-                st.session_state["ideas"] = result
-                st.session_state["last_topic"] = topic
-                st.session_state["last_language"] = language
-                st.success("Five video ideas generated!")
-
-     
-ideas_prompt = f"""
+      ideas_prompt = f"""
 You are an expert YouTube content strategist, audience researcher,
 and professional video idea developer.
 
@@ -227,7 +214,21 @@ useful, accurate, grammatically correct and appropriate
 for the specified audience and language.
 
 Return only the five completed ideas.
-"""
+""" 
+        with st.spinner("Finding your best video ideas..."):
+            try:
+                result = generate_with_retry(
+                    ideas_prompt,
+                    max_tokens=2000
+                )
+
+                st.session_state["ideas"] = result
+                st.session_state["last_topic"] = topic
+                st.session_state["last_language"] = language
+                st.success("Five video ideas generated!")
+
+     
+
        except Exception as e:
                 st.error("Idea generation failed.")
                 st.write(str(e))
